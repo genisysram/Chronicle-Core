@@ -17,16 +17,24 @@ public class AbstractCloseableTest extends CoreTestCommon {
     public void close() throws IllegalStateException {
         MyCloseable mc = new MyCloseable();
         assertFalse(mc.isClosed());
+        assertEquals(0, mc.beforeClose);
         assertEquals(0, mc.performClose);
 
         mc.throwExceptionIfClosed();
 
- mc.close();
+        mc.close();
         assertTrue(mc.isClosed());
+        assertEquals(1, mc.beforeClose);
         assertEquals(1, mc.performClose);
 
         mc.close();
         assertTrue(mc.isClosed());
+        assertEquals(2, mc.beforeClose);
+        assertEquals(1, mc.performClose);
+
+        mc.close();
+        assertTrue(mc.isClosed());
+        assertEquals(3, mc.beforeClose);
         assertEquals(1, mc.performClose);
     }
 
@@ -46,7 +54,7 @@ public class AbstractCloseableTest extends CoreTestCommon {
         MyCloseable mc = new MyCloseable();
 
         // not recorded for now.
-      mc.warnAndCloseIfNotClosed();
+        mc.warnAndCloseIfNotClosed();
 
         assertTrue(mc.isClosed());
         Jvm.resetExceptionHandlers();
@@ -58,7 +66,14 @@ public class AbstractCloseableTest extends CoreTestCommon {
     }
 
     static class MyCloseable extends AbstractCloseable {
+        int beforeClose;
         int performClose;
+
+        @Override
+        protected void beforeClose() {
+            super.beforeClose();
+            beforeClose++;
+        }
 
         @Override
         protected void performClose() {
