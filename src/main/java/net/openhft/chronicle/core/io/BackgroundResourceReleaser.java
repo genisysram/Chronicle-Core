@@ -60,13 +60,15 @@ public enum BackgroundResourceReleaser {
                 performRelease(o);
             }
 
-            for (int i = 0; i < 1000 && COUNTER.get() > 0; i++)
-                Jvm.pause(1);
+            for (int i = 0; i < 5000 && COUNTER.get() > 0; i++)
+                Thread.sleep(1);
+            Thread.yield();
             long left = COUNTER.get();
             if (left != 0)
                 Jvm.warn().on(BackgroundResourceReleaser.class, "Still got " + left + " resources to clean");
 
         } catch (InterruptedException e) {
+            Jvm.warn().on(BackgroundResourceReleaser.class, "releasePendingResources interrupted");
             Thread.currentThread().interrupt();
         }
     }
