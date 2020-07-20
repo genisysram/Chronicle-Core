@@ -130,6 +130,7 @@ public abstract class AbstractCloseable implements CloseableTracer, ReferenceOwn
      */
     @Override
     public final void close() {
+        beforeClose();
         if (UNSAFE.getAndSetInt(this, CLOSED_OFFSET, 1) != 0) {
             return;
         }
@@ -148,6 +149,14 @@ public abstract class AbstractCloseable implements CloseableTracer, ReferenceOwn
                     !Thread.currentThread().getName().equals(BACKGROUND_RESOURCE_RELEASER))
                 Jvm.warn().on(getClass(), "Took " + time / 1000_000 + " ms to performClose");
         }
+    }
+
+    /**
+     * Called at the start of every attempt to close whether already closed or not.
+     * Multiple threads can be in this method at once.
+     */
+    protected void beforeClose() {
+
     }
 
     /**
