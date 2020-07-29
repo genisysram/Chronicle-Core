@@ -350,4 +350,34 @@ public class MathsTest {
         // UT8 & Not-equal hashes
         assertNotEquals(Maths.hash64("Δ"), Maths.hash64("Γ"));
     }
+
+    @Test
+    public void testAssertBetween() {
+        Maths.assertBetween("one", 1, 3, 1);
+        Maths.assertBetween("one", 1, 3, 2);
+        Maths.assertBetween("one", 1, 3, 3);
+        Maths.assertBetween("two", 1.0, 3.0, 1.0);
+        Maths.assertBetween("two", 1.0, 3.0, 2.0);
+        Maths.assertBetween("two", 1.0, 3.0, 3.0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenLoD() {
+        Maths.assertBetween(1, 3, 1 - Math.ulp(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenLoL() {
+        Maths.assertBetween(1, 3, 0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenHiD() {
+        Maths.assertBetween(1, 3, 3 + Math.ulp(3));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenHiL() {
+        Maths.assertBetween(1, 3, 4);
+    }
 }
