@@ -42,7 +42,7 @@ public class Histogram implements NanoSampler {
      * 32 to 4*10^12 (1 hour in nanoseconds) with 2 digits of accuracy.
      */
     public Histogram() {
-        this(37, 6, 32);
+        this(37, 6, 1);
     }
 
     public Histogram(int powersOf2, int fractionBits) {
@@ -299,7 +299,7 @@ public class Histogram implements NanoSampler {
 
     @NotNull
     private String p(double v) {
-        double v2 = v * 100 / (1 << fractionBits);
+        double v2 = v * 1000 / (1 << fractionBits);
         // Uses non thread safe static fields.
         synchronized (Histogram.class) {
             return v2 < 1 ? F3.format(v) :

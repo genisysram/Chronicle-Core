@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.core.util;
 
+import net.openhft.ticker.ITicker;
+import net.openhft.ticker.Ticker;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -63,8 +65,7 @@ public class HistogramTest {
         assertEquals(1, (long) h.percentile(0.0), 0);
     }
 
-/*    @Test
-    @Ignore("Long running")
+    @Test // Long running
     public void testManySamples() throws IOException {
 //        try (FileOutputStream cpu_dma_latency = new FileOutputStream("/dev/cpu_dma_latency")) {
 //            cpu_dma_latency.write('0');
@@ -73,9 +74,9 @@ public class HistogramTest {
 //        System.out.println("Cpu: " + Affinity.getAffinity());
         ITicker instance = Ticker.INSTANCE;
         for (int t = 0; t < 5; t++) {
-            Histogram h = new Histogram(32, 4);
+            Histogram h = new Histogram();
             long start = instance.ticks(), prev = start;
-            for (int i = 0; i <= 1000_000_000; i++) {
+            for (int i = 0; i <= 50_000_000; i++) {
                 long now = instance.ticks();
                 long time = now - prev;
                 h.sample(time);
@@ -84,7 +85,7 @@ public class HistogramTest {
             System.out.println(h.toLongMicrosFormat(instance::toMicros));
         }
 //        }
-    }*/
+    }
 
     public static void main(String[] args) throws IOException {
         Histogram hist = new Histogram(32, 7);
