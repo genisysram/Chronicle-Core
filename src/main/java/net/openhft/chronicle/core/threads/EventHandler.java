@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 
 @FunctionalInterface
-public interface EventHandler extends VanillaEventHandler {
+public interface EventHandler extends VanillaEventHandler, Closeable {
     default void eventLoop(EventLoop eventLoop) {
     }
 
@@ -38,8 +38,12 @@ public interface EventHandler extends VanillaEventHandler {
      * <p>Exceptions thrown by loopFinished or close are caught and logged (at debug level)
      * and cleanup continues
      */
-    // TODO Replace this with close() only.
+    @Deprecated
     default void loopFinished() {
+    }
+
+    default void close() {
+        loopFinished();
     }
 
     @NotNull
