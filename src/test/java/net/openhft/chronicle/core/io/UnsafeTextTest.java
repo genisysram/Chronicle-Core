@@ -3,8 +3,6 @@ package net.openhft.chronicle.core.io;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCooler;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
@@ -12,8 +10,7 @@ public class UnsafeTextTest {
 
     static long blackhole;
 
-    @Test
-    @Ignore("Performance test")
+    // @Test // Performance test
     public void coolerAppendBase10() {
         long address = UNSAFE.allocateMemory(32);
         new CoolerTester(new CpuCooler[]{

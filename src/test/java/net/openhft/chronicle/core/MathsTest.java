@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -200,8 +199,7 @@ public class MathsTest {
         }
     }
 
-    @Test
-    @Ignore("Long running")
+    // @Test // Long running
     public void longRunningRound() {
         @NotNull double[] ds = new double[17];
         ds[0] = 1e-4;
@@ -216,8 +214,7 @@ public class MathsTest {
                 });
     }
 
-    @Test
-    @Ignore("Long running, avg score = 6879")
+    // @Test // Long running, avg score = 6879
     public void testRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;

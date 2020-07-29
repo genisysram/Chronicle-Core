@@ -108,7 +108,7 @@ public enum Mocker {
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), classes.toArray(NO_CLASSES), new AbstractInvocationHandler(ConcurrentHashMap::new) {
             @Override
-            protected Object doInvoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+            protected Object doInvoke(Object proxy, Method method, Object[] args) {
                 return null;
             }
         });
