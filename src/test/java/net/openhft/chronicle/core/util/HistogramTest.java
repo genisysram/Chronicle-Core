@@ -32,7 +32,7 @@ public class HistogramTest {
 
     @Test
     public void testSampleRange() {
-        @NotNull Histogram h = new Histogram(40, 2);
+        @NotNull Histogram h = new Histogram(40, 2, 1.0);
         double base = 1;
         for (int i = 0; i < 40; i++) {
 //            System.out.println(i);
@@ -47,7 +47,7 @@ public class HistogramTest {
 
     @Test
     public void testSamples() {
-        @NotNull Histogram h = new Histogram(7, 5);
+        @NotNull Histogram h = new Histogram(7, 5, 1.0);
         for (int i = 1; i <= 100; i++)
             h.sample(i);
         assertEquals(101, h.percentile(1), 0);

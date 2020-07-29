@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.function.DoubleFunction;
 import java.util.stream.DoubleStream;
 
-// TODO add a dummy histogram.
 public class Histogram implements NanoSampler {
     private static final DecimalFormat F3 = new DecimalFormat("0.000");
     private static final DecimalFormat F2 = new DecimalFormat("0.00");
@@ -39,12 +38,15 @@ public class Histogram implements NanoSampler {
     private long floor;
     private int[] sampleCount;
 
+    /**
+     * 32 to 4*10^12 (1 hour in nanoseconds) with 2 digits of accuracy.
+     */
     public Histogram() {
-        this(42, 7);
+        this(37, 6, 32);
     }
 
     public Histogram(int powersOf2, int fractionBits) {
-        this(powersOf2, fractionBits, 1.0);
+        this(powersOf2, fractionBits, 1);
     }
 
     public Histogram(int powersOf2, int fractionBits, double minValue) {
