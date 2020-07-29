@@ -318,7 +318,7 @@ public class MathsTest {
         String a1 = "Test";
         long ah1 = Maths.hash64(a1);
 
-        String a2 = new StringBuilder().append("T").append("e").toString() + "st";
+        String a2 = new StringBuilder().append('T').append('e').toString() + "st";
         long ah2 = Maths.hash64(a2);
 
         assertEquals(ah1, ah2);
