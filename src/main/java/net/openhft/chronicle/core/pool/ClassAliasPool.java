@@ -107,7 +107,7 @@ public class ClassAliasPool implements ClassLookup {
 
     @Override
     @NotNull
-    public Class forName(@NotNull CharSequence name) throws ClassNotFoundException {
+    public Class forName(@NotNull CharSequence name) /*throws ClassNotFoundException*/ {
         Objects.requireNonNull(name);
         CAPKey key = CAP_KEY_TL.get();
         key.value = name;
@@ -120,7 +120,7 @@ public class ClassAliasPool implements ClassLookup {
     }
 
     @NotNull
-    private synchronized Class forName0(@NotNull CAPKey key) throws ClassNotFoundException {
+    private synchronized Class forName0(@NotNull CAPKey key) {
         Class clazz = stringClassMap2.get(key);
         if (clazz != null) return clazz;
         String name0 = key.toString();

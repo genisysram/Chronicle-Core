@@ -505,7 +505,7 @@ public enum StringUtils {
     }
 
     static NumberFormatException forInputString(CharSequence s) {
-        return new NumberFormatException("For input string: \"" + s + "\"");
+        return new NumberFormatException("For input string: \"" + s + '"');
     }
 
     public static long parseLong(CharSequence s, int radix)

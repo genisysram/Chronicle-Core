@@ -71,7 +71,7 @@ public class MonitorProfileAnalyserMain {
 
                     } else if (partOfStackTrace(line) && lineCount >= 0) {
                         if (++lineCount <= MAX_LINES) {
-                            sb.append(line).append("\n");
+                            sb.append(line).append('\n');
                         }
                     } else if (sb.length() > 0) {
                         addToStackCount(ignoreSubStrings, stackCount, sb);

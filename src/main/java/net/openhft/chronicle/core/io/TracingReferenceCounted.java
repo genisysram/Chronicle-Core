@@ -33,7 +33,7 @@ public final class TracingReferenceCounted implements ReferenceCountedTracer {
         if (id == INIT) return "INIT";
         String s = id instanceof ReferenceOwner
                 ? ((ReferenceOwner) id).referenceName()
-                : id.getClass().getSimpleName() + "@" + Integer.toHexString(System.identityHashCode(id));
+                : id.getClass().getSimpleName() + '@' + Integer.toHexString(System.identityHashCode(id));
         if (id instanceof ReferenceCounted)
             s += " refCount=" + ((ReferenceCounted) id).refCount();
         if (id instanceof Closeable)
@@ -160,9 +160,9 @@ public final class TracingReferenceCounted implements ReferenceCountedTracer {
 
     @NotNull
     private StackTrace stackTrace(String oper, ReferenceOwner ro) {
-        return new StackTrace(toString() + " "
-                + Thread.currentThread().getName() + " "
-                + oper + " "
+        return new StackTrace(toString() + ' '
+                + Thread.currentThread().getName() + ' '
+                + oper + ' '
                 + asString(ro));
     }
 

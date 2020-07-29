@@ -57,7 +57,7 @@ public enum JitterSampler {
         sb.append(PROFILE_OF_THE_THREAD)
                 .append(' ').append(thread.getName())
                 .append(' ').append(desc)
-                .append(" " + THREAD_HAS_BLOCKED_FOR + " ").append((now - time) / 1000_000)
+                .append(' ' + THREAD_HAS_BLOCKED_FOR + ' ').append((now - time) / 1000_000)
                 .append(" ms\n");
         for (StackTraceElement ste : stes) {
             sb.append("\tat ").append(ste).append('\n');

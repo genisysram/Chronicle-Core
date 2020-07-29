@@ -38,7 +38,7 @@ public class ClassifyingWatcherListener implements WatcherListener {
         for (FileClassifier classifier : classifiers) {
             FileManager manager = classifier.classify(base, filename);
             if (manager != null) {
-                Jvm.warn().on(getClass(), "File " + base + " " + filename + " classified as " + manager);
+                Jvm.warn().on(getClass(), "File " + base + ' ' + filename + " classified as " + manager);
                 fileManagerMap.put(path, manager);
                 manager.start();
             }

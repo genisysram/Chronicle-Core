@@ -54,7 +54,7 @@ public interface LicenceCheck {
                 warn().on(LicenceCheck.class, message + ". At which point, this product will stop working, if you wish to renew this licence please contact sales@chronicle.software");
 
             } catch (Throwable t) {
-                Jvm.rethrow(new TimeLimitExceededException("Failed to read expiry date, from '" + expiryDateFile + "'"));
+                Jvm.rethrow(new TimeLimitExceededException("Failed to read expiry date, from '" + expiryDateFile + '\''));
             }
         } else {
             int start = key.indexOf("expires=") + 8;

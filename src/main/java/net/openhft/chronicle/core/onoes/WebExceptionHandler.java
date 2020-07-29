@@ -63,10 +63,10 @@ public class WebExceptionHandler implements ExceptionHandler {
                 version = parts[1];
             }
 
-            uri += "+" + version + "+" + URIEncoder.encodeURI(t.toString())
-                    + "+" + URIEncoder.encodeURI(clazz.getSimpleName());
+            uri += '+' + version + '+' + URIEncoder.encodeURI(t.toString())
+                    + '+' + URIEncoder.encodeURI(clazz.getSimpleName());
             if (message != null)
-                uri += "+" + URIEncoder.encodeURI(message);
+                uri += '+' + URIEncoder.encodeURI(message);
         }
         try {
             if (Jvm.isDebug() && Desktop.isDesktopSupported())

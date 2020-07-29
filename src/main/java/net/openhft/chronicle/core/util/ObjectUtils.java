@@ -258,7 +258,7 @@ public enum ObjectUtils {
                 throw asCCE(e);
             }
         }
-        throw new ClassCastException("Unable to convert " + o.getClass() + " " + o + " to " + eClass);
+        throw new ClassCastException("Unable to convert " + o.getClass() + ' ' + o + " to " + eClass);
     }
 
     @NotNull
@@ -388,7 +388,7 @@ public enum ObjectUtils {
     public static <T> T printAll(@NotNull Class<T> tClass, Class... additional) throws IllegalArgumentException {
         return onMethodCall((method, args) -> {
             @NotNull String argsStr = args == null ? "()" : Arrays.toString(args);
-            System.out.println(method.getName() + " " + argsStr);
+            System.out.println(method.getName() + ' ' + argsStr);
             return defaultValue(method.getReturnType());
         }, tClass, additional);
     }

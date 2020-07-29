@@ -100,7 +100,7 @@ public class FileSystemWatcher {
 
     private boolean matches(PathInfo path, String filename) {
         String s = path.full;
-        return s.equals(filename) || s.startsWith(filename + "/");
+        return s.equals(filename) || s.startsWith(filename + '/');
     }
 
     private static String p(String path) {
@@ -131,8 +131,8 @@ public class FileSystemWatcher {
 
                             @SuppressWarnings("unchecked")
                             WatchEvent<Path> event2 = (WatchEvent<Path>) event;
-                            String fullRelative = (base.relativePath.isEmpty() ? "" : base.relativePath + "/") + event2.context();
-                            String filename = base.basePath + "/" + fullRelative;
+                            String fullRelative = (base.relativePath.isEmpty() ? "" : base.relativePath + '/') + event2.context();
+                            String filename = base.basePath + '/' + fullRelative;
                             if (event.kind() == ENTRY_CREATE) {
                                 listener.onExists(p(base.basePath), p(fullRelative), false);
                                 addPath(base.basePath, fullRelative);
