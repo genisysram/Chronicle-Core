@@ -205,6 +205,9 @@ public enum StringUtils {
         }
     }
 
+    /**
+     * Extract the underlying byte[] which may be longer than the actual text so the length() must be checked.
+     */
     @Java9
     public static byte[] extractBytes(@NotNull StringBuilder sb) {
         ensureJava9Plus();
