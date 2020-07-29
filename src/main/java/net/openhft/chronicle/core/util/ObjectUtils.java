@@ -326,7 +326,6 @@ public enum ObjectUtils {
                 return n.byteValue();
             if (eClass == BigDecimal.class)
                 return n instanceof Long ? BigDecimal.valueOf(n.longValue()) : BigDecimal.valueOf(n.doubleValue());
-            // TODO fix for large numbers.
             if (eClass == BigInteger.class)
                 return new BigInteger(o.toString());
         } else {
@@ -345,7 +344,6 @@ public enum ObjectUtils {
                 return Byte.parseByte(s);
             if (eClass == BigDecimal.class)
                 return new BigDecimal(s);
-            // TODO fix for large numbers.
             if (eClass == BigInteger.class)
                 return new BigInteger(s);
         }
