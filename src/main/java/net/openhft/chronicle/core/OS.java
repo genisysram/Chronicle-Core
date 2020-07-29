@@ -341,7 +341,7 @@ public enum OS {
                                               @NotNull ThrowingFunction<OutOfMemoryError, Long, IOException> errorHandler) throws IOException {
         try {
             // For now, access is assumed to be non-synchronous
-            // TODO - Support passing/deducing synchronous flag externally
+            // TODO v14 - Support passing/deducing synchronous flag externally
             if (Jvm.isJava14Plus())
                 return (long) map0.invokeExact((FileChannelImpl) fileChannel, imode, start, size, false);
             else

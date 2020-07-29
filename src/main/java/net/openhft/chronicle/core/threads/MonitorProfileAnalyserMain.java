@@ -59,7 +59,7 @@ public class MonitorProfileAnalyserMain {
             StringBuilder sb = new StringBuilder();
             int lineCount = -1;
             try (BufferedReader br = Files.newBufferedReader(Paths.get(arg))) {
-                // TODO: PrintGCApplicationStoppedTime
+                // hint -XX:+PrintGCApplicationStoppedTime
 
                 for (String line; (line = br.readLine()) != null; ) {
                     if (line.contains(PROFILE_OF_THE_THREAD) || line.contains(THREAD_HAS_BLOCKED_FOR)) {
