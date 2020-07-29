@@ -644,7 +644,6 @@ public class UnsafeMemory implements Memory {
     @Override
     @ForceInline
     public short readVolatileShort(long address) {
-        // TODO add support for a short split across cache lines.
         return UNSAFE.getShortVolatile(null, address);
     }
 
@@ -681,7 +680,6 @@ public class UnsafeMemory implements Memory {
     @Override
     @ForceInline
     public float readVolatileFloat(long address) {
-        // TODO add support for a float split across cache lines.
         return UNSAFE.getFloatVolatile(null, address);
     }
 
@@ -716,7 +714,6 @@ public class UnsafeMemory implements Memory {
     @Override
     @ForceInline
     public double readVolatileDouble(long address) {
-        // TODO add support for a double split across cache lines.
         return UNSAFE.getDoubleVolatile(null, address);
     }
 
