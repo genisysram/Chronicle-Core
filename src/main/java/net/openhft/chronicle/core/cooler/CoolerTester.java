@@ -147,7 +147,7 @@ public class CoolerTester {
                         else
                             innerloop0(tested, histogram, start, count, minCount, runTimeMS, maxCount);
                         if (tests.size() > 1)
-                            System.out.print(testNames.get(j) + " ");
+                            System.out.print(testNames.get(j) + ' ');
                         System.out.print(disturber);
                         System.out.println(" - " + histogram.toLongMicrosFormat());
                         if (t == 0)

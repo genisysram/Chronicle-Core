@@ -43,7 +43,7 @@ public enum PrintExceptionHandler implements ExceptionHandler {
 
     private static void printLog(@NotNull Class clazz, String message, @Nullable Throwable thrown, PrintStream stream) {
         synchronized (stream) {
-            System.err.print(LocalDateTime.now() + " " + Thread.currentThread().getName() + " " + clazz.getSimpleName() + " " + message);
+            System.err.print(LocalDateTime.now() + " " + Thread.currentThread().getName() + ' ' + clazz.getSimpleName() + ' ' + message);
             if (thrown != null)
                 thrown.printStackTrace(System.err);
             else

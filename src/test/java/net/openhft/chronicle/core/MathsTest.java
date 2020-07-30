@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -200,8 +199,7 @@ public class MathsTest {
         }
     }
 
-    @Test
-    @Ignore("Long running")
+    // @Test // Long running
     public void longRunningRound() {
         @NotNull double[] ds = new double[17];
         ds[0] = 1e-4;
@@ -216,8 +214,7 @@ public class MathsTest {
                 });
     }
 
-    @Test
-    @Ignore("Long running, avg score = 6879")
+    // @Test // Long running, avg score = 6879
     public void testRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
@@ -321,7 +318,7 @@ public class MathsTest {
         String a1 = "Test";
         long ah1 = Maths.hash64(a1);
 
-        String a2 = new StringBuilder().append("T").append("e").toString() + "st";
+        String a2 = new StringBuilder().append('T').append('e').toString() + "st";
         long ah2 = Maths.hash64(a2);
 
         assertEquals(ah1, ah2);
@@ -349,5 +346,35 @@ public class MathsTest {
 
         // UT8 & Not-equal hashes
         assertNotEquals(Maths.hash64("Δ"), Maths.hash64("Γ"));
+    }
+
+    @Test
+    public void testAssertBetween() {
+        Maths.assertBetween("one", 1, 3, 1);
+        Maths.assertBetween("one", 1, 3, 2);
+        Maths.assertBetween("one", 1, 3, 3);
+        Maths.assertBetween("two", 1.0, 3.0, 1.0);
+        Maths.assertBetween("two", 1.0, 3.0, 2.0);
+        Maths.assertBetween("two", 1.0, 3.0, 3.0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenLoD() {
+        Maths.assertBetween(1, 3, 1 - Math.ulp(1));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenLoL() {
+        Maths.assertBetween(1, 3, 0);
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenHiD() {
+        Maths.assertBetween(1, 3, 3 + Math.ulp(3));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertBetweenHiL() {
+        Maths.assertBetween(1, 3, 4);
     }
 }

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import static net.openhft.chronicle.core.Maths.assertBetween;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
@@ -25,7 +26,8 @@ public class BackgroundResourceReleaserTest {
         long start = System.currentTimeMillis();
         BackgroundResourceReleaser.releasePendingResources();
         long time = System.currentTimeMillis() - start;
-        assertEquals(count * 10 + 20, time, 30);
+        assertEquals(count * 10, count * 10 + 80.0, time);
+        assertBetween(count * 10, count * 10 + 80, time);
         assertEquals(count, closed.get());
         assertEquals(count, released.get());
         AbstractCloseable.assertCloseablesClosed();

@@ -641,7 +641,7 @@ public enum Jvm {
         System.out.println("exceptions: " + exceptions.size());
         for (@NotNull Map.Entry<ExceptionKey, Integer> entry : exceptions.entrySet()) {
             ExceptionKey key = entry.getKey();
-            System.err.println(key.level + " " + key.clazz.getSimpleName() + " " + key.message);
+            System.err.println(key.level + " " + key.clazz.getSimpleName() + ' ' + key.message);
             if (key.throwable != null)
                 key.throwable.printStackTrace();
             Integer value = entry.getValue();

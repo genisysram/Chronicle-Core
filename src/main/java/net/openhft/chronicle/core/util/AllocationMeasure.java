@@ -123,7 +123,7 @@ public class AllocationMeasure {
         if (tid != Thread.currentThread().getId())
             throw new AssertionError("AllocationMeasure must not be used over more than 1 thread.");
         long mark1 = ((threadAllocatedBytes() - BYTES_USED_TO_MEASURE) - allocated.get());
-        LOG.info(threadName + " allocated " + marker + ":" + mark1);
+        LOG.info(threadName + " allocated " + marker + ':' + mark1);
         allocated.set(threadAllocatedBytes());
     }
 }

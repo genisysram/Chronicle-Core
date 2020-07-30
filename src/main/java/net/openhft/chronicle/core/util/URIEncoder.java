@@ -48,7 +48,7 @@ public class URIEncoder {
 
     private static void appendEscaped(@NotNull StringBuilder uri, char c) {
         if (c <= 0xFF) {
-            uri.append("%");
+            uri.append('%');
             uri.append(hex[(c >> 4) & 0xF]);
             uri.append(hex[c & 0xF]);
             return;

@@ -434,7 +434,7 @@ public enum Maths {
 
     public static int digits(long num) {
         int index = Arrays.binarySearch(TENS, num);
-        return index < -1 ? -1-index : index >= 0 ? index+1 : 1;
+        return index < -1 ? -1 - index : index >= 0 ? index + 1 : 1;
     }
 
     public static long fives(int decimalPlaces) {
@@ -447,5 +447,31 @@ public enum Maths {
 
     public static boolean same(float a, float b) {
         return Float.isNaN(a) ? Float.isNaN(b) : a == b;
+    }
+
+    public static void assertBetween(long fromInclusize, long toInclusive, long value) {
+        assertBetween(null, fromInclusize, toInclusive, value);
+    }
+
+    public static void assertBetween(String text, long fromInclusize, long toInclusive, long value) {
+        if (value < fromInclusize)
+            throw new AssertionError((text == null ? "" : text + ' ')
+                    + "Expected " + fromInclusize + " but was " + value);
+        if (value > toInclusive)
+            throw new AssertionError((text == null ? "" : text + ' ')
+                    + "Expected " + toInclusive + " but was " + value);
+    }
+
+    public static void assertBetween(double fromInclusize, double toInclusive, double value) {
+        assertBetween(null, fromInclusize, toInclusive, value);
+    }
+
+    public static void assertBetween(String text, double fromInclusize, double toInclusive, double value) {
+        if (value < fromInclusize)
+            throw new AssertionError((text == null ? "" : text + ' ')
+                    + "Expected " + fromInclusize + " but was " + value);
+        if (value > toInclusive)
+            throw new AssertionError((text == null ? "" : text + ' ')
+                    + "Expected " + toInclusive + " but was " + value);
     }
 }

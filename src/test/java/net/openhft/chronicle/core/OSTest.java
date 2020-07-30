@@ -29,7 +29,6 @@ import org.junit.rules.TestName;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -69,9 +68,7 @@ public class OSTest {
      * tests that windows supports page mapping granularity
      */
     @Test
-    //@Ignore("Failing on TC (linux agent) for unknown reason, anyway the goal of this test is to " +
-    //        "test mapping granularity on windows")
-    public void testMapGranularity() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public void testMapGranularity() throws IOException {
         File file = IOTools.createTempFile(getClass().getName() + "." + testName.getMethodName());
 
         try (RandomAccessFile rw = new RandomAccessFile(file, "rw")) {
@@ -91,8 +88,7 @@ public class OSTest {
     }
 
     @Test
-    //@Ignore("Should always pass, or crash the JVM based on length")
-    public void testMap() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public void testMap() throws IOException {
         File file = IOTools.createTempFile(getClass().getName() + "." + testName.getMethodName());
 
         try (RandomAccessFile rw = new RandomAccessFile(file, "rw")) {
