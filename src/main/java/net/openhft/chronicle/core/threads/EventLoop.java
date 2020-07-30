@@ -35,9 +35,11 @@ public interface EventLoop extends Closeable {
     /**
      * Add handler to event loop to be executed. Event loops should execute handlers in order of priority.
      * Handlers with same priority have no guarantee of execution order.
+     *
      * @param handler handler
+     * @returns closeable to use for cleaning up.
      */
-    void addHandler(EventHandler handler);
+    Closeable addHandler(EventHandler handler);
 
     void start();
 

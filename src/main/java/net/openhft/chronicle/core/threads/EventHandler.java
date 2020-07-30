@@ -27,23 +27,7 @@ public interface EventHandler extends VanillaEventHandler, Closeable {
     default void eventLoop(EventLoop eventLoop) {
     }
 
-    /**
-     * Notify handler that the event the handler's action method
-     * will not be called again. Should be called once only. Should be called from the event
-     * loop's execution thread.
-     * <p>This is called either when the event loop is terminating, or if this EventHandler s being
-     * removed from the event loop.
-     * <p>If this implements {@link Closeable} then the event loop will close this after
-     * loopFinished has been called. close should be called once only.
-     * <p>Exceptions thrown by loopFinished or close are caught and logged (at debug level)
-     * and cleanup continues
-     */
-    @Deprecated
-    default void loopFinished() {
-    }
-
     default void close() {
-        loopFinished();
     }
 
     @NotNull

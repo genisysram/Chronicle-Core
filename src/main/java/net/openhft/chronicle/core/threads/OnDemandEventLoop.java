@@ -1,5 +1,7 @@
 package net.openhft.chronicle.core.threads;
 
+import net.openhft.chronicle.core.io.Closeable;
+
 import java.util.function.Supplier;
 
 public class OnDemandEventLoop implements EventLoop {
@@ -32,8 +34,8 @@ public class OnDemandEventLoop implements EventLoop {
     }
 
     @Override
-    public void addHandler(EventHandler handler) {
-        eventLoop().addHandler(handler);
+    public Closeable addHandler(EventHandler handler) {
+        return eventLoop().addHandler(handler);
     }
 
     @Override

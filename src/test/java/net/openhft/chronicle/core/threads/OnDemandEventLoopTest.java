@@ -1,5 +1,6 @@
 package net.openhft.chronicle.core.threads;
 
+import net.openhft.chronicle.core.io.Closeable;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -14,7 +15,7 @@ public class OnDemandEventLoopTest {
             }
 
             @Override
-            public void addHandler(EventHandler handler) {
+            public Closeable addHandler(EventHandler handler) {
                 throw new UnsupportedOperationException();
             }
 
