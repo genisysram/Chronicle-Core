@@ -5,7 +5,7 @@
 package net.openhft.chronicle.core.io;
 
 import net.openhft.chronicle.core.StackTrace;
-import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -19,12 +19,14 @@ public final class TracingReferenceCounted implements ReferenceCountedTracer {
     private final Map<ReferenceOwner, StackTrace> releases = Collections.synchronizedMap(new IdentityHashMap<>());
     private final Runnable onRelease;
     private final String uniqueId;
+    private final ExceptionHandler warn;
     private final StackTrace createdHere;
     private volatile StackTrace releasedHere;
 
-    TracingReferenceCounted(final Runnable onRelease, String uniqueId) {
+    TracingReferenceCounted(final Runnable onRelease, String uniqueId, ExceptionHandler warn) {
         this.onRelease = onRelease;
         this.uniqueId = uniqueId;
+        this.warn = warn;
         createdHere = stackTrace("init", INIT);
         references.put(INIT, createdHere);
     }
@@ -221,7 +223,7 @@ public final class TracingReferenceCounted implements ReferenceCountedTracer {
     @Override
     public void warnAndReleaseIfNotReleased() {
         if (refCount() > 0) {
-            Slf4jExceptionHandler.WARN.on(getClass(), "Discarded without being released", createdHere);
+            warn.on(getClass(), "Discarded without being released", createdHere);
             onRelease.run();
         }
     }
