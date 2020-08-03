@@ -1,7 +1,9 @@
 package net.openhft.chronicle.core.threads;
 
 import net.openhft.chronicle.core.io.Closeable;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class OnDemandEventLoop implements EventLoop {
@@ -36,6 +38,11 @@ public class OnDemandEventLoop implements EventLoop {
     @Override
     public Closeable addHandler(EventHandler handler) {
         return eventLoop().addHandler(handler);
+    }
+
+    @Override
+    public Closeable addHandler(@NotNull final BiFunction<Thread, EventLoop, EventHandler> constructor, @NotNull final HandlerPriority priority) {
+        return eventLoop().addHandler(constructor, priority);
     }
 
     @Override

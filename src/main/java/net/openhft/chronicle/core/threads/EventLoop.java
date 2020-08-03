@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.BiFunction;
+
 public interface EventLoop extends Closeable {
     boolean DEBUG_ADDING_HANDLERS = Jvm.getBoolean("debug.adding.handlers");
 
@@ -40,6 +42,25 @@ public interface EventLoop extends Closeable {
      * @return closeable to use for cleaning up.
      */
     Closeable addHandler(EventHandler handler);
+
+    /**
+     * Adds a handler to this EventLoop by first invoking the provided EventHandler
+     * constructor and then taking the constructed instance and providing it to
+     * the {@link #addHandler(EventHandler)} method.
+     * <p>
+     * The BiFunction's Thread is the event thread for this EventLoop
+     * The BiFunction's EventLoop is the same parameter later provided to EventHandler::eventLoop
+     * <p>
+     * This method improves the ability to write immutable or partly immutable EventHandler classes
+     * compared with the {@link #addHandler(EventHandler)} method.
+     *
+     * @param constructor to invoke when creating an EventHandler
+     * @param priority for the EventHandler that must match the created EventHandler's priority
+     * @return closeable to use for cleaning up.
+     * @throws IllegalStateException if the provided {@code priority} does not match the
+     * constructed EventHandler's priority.
+     */
+    Closeable addHandler(@NotNull BiFunction<Thread, EventLoop, EventHandler> constructor, @NotNull HandlerPriority priority);
 
     void start();
 
