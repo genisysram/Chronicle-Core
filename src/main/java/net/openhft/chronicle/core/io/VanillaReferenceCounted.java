@@ -4,7 +4,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static net.openhft.chronicle.core.io.TracingReferenceCounted.asString;
@@ -18,12 +18,14 @@ public final class VanillaReferenceCounted implements ReferenceCountedTracer {
     }
 
     private final Runnable onRelease;
+    private final ExceptionHandler warn;
     @UsedViaReflection
     private volatile int value = 1;
     private volatile boolean released = false;
 
-    VanillaReferenceCounted(final Runnable onRelease) {
+    VanillaReferenceCounted(final Runnable onRelease, ExceptionHandler warn) {
         this.onRelease = onRelease;
+        this.warn = warn;
     }
 
     @Override
@@ -134,7 +136,7 @@ public final class VanillaReferenceCounted implements ReferenceCountedTracer {
     @Override
     public void warnAndReleaseIfNotReleased() {
         if (refCount() > 0) {
-            Slf4jExceptionHandler.WARN.on(getClass(), "Discarded without being released");
+            warn.on(getClass(), "Discarded without being released");
             callOnRelease();
         }
     }

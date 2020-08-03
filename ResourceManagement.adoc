@@ -1,0 +1,311 @@
+= Resource Management
+Peter Lawrey
+03 Aug 2020
+
+Chronicle Core defines some simple, low cost deterministic resource management which doesn't rely on the garbage collector.
+This is particualrly useful in low GC environments where expensive off heap resources still need to be cleaned up effeciently.
+These include; off heap memory, memory mapped files, files handles and sockets.
+
+== Defined lifecycles
+
+To assist in the implementation of each style of lifecycle, there are `abstract` classes which provide a template for each lifecycle.
+
+=== Resource Tracing
+
+You can enable resource tracing to add extra detail to help diagnose an issue.
+This add significant overhead and shouldn't be used if perforamnce is critcal.
+
+`-Djvm.resource.tracing` or `-Djvm.resource.tracing=on` or `-Djvm.resource.tracing=true`
+
+or add to the `system.properties` file in your working directory
+
+.system.properties
+----
+jvm.resource.tracing=true
+----
+
+=== Background Releaser
+
+Some resources which use IO or take a long time to release can be released in the background.
+This is on by default and you can disable this with
+
+`-Dbackground.releaser=off` or `-Dbackground.releaser=false`
+
+or add to the `system.properties` file in your working directory
+
+.system.properties
+----
+background.releaser=false
+----
+
+== Closeable
+
+Chronicle Core's Closeable extends the in built `java.io.Closeable` but has some significiant extensions.
+
+`isClosed` returns `true` if the resource is known to have close called.
+NOTE: The resource may actually still being closed in another thread or closed in the background.
+
+`throwExceptionIfClosed` this throws an `IllegalStateException` if this resource has been closed.
+If Resource tracing is enabled, the `getCause()` will be a `StackTrace` where the resource was first closed.
+
+=== Life cycle
+
+The standard `Closeable` of resource are that they can be used until they are closed. i.e. `close()` is called.
+While this appears simple enough there are some complexity.
+
+Some `Closeable` can be used in multiple threads, so they can be closed while they are still being used.
+For this reason, most checks for closing are perfomed at the start of a checked operation, and not checked again unless some iteration or retry loop is performed.
+This approach is taken to avoid needing to lock the resource on each usage where possible.
+
+Some `Closeable` can be used in just one thread at a time.
+However, they can still be closed from another thread.
+
+There are flyweight `Closeable` such as `DocumentContext` which are single threaded, however can be reset and reused to reduce garbage.
+
+=== AbstractCloseable
+
+This `abstract class` supports management and tracing of resources.
+This is approriate for resources which must be closed to ensure resources are released approriately.
+When tracing is enabled, a test can ensure every `AbstractCloseable` was closed correctly by the end of the test.
+
+This resources isn't reuseable after being closed, however simple read-only operations e.g. getters, still work after the resource is closed.
+Obviously, calls to `close` are allowed but are ignored.
+
+`AbstractCloseable` can be closed in a background thread if it is enabled (the default) and `performCloseInBackground()` returns `true`.
+To wait for all the background resources to be cleaned up you can call `BackgroundResourceReleaser.releasePendingResources();` which causes the current thread to help release resource, and wait for all of them to be released.
+
+NOTE: `AbstractCloseable` have a default `toString()` which is the simple class name plus a `referenceId()` which is a counter for that class.
+This is intended to give fairly short, stable ids from one run to the next.
+
+==== performClose()
+
+The `protected void performClose()` method is called once when the resource is closed, either in the current thread or the background releaser thread depending on the resource.
+
+==== Discarded resource warning
+
+A closeable resource can override `Object.finalize()` to call `warnAndCloseIfNotClosed()` This will report if a resource wasn't closed, where the resource was created to help determine where it should have been closed (when resource tracing is turned on), and closes the resource.
+
+==== Checking thread safety
+
+By default, when `assert` is on, components which are not thread safe are checked at the start of method calls if the component has been accessed from multiple threads.
+This detects when a resource is accessed by different threads at any time, not just concurrent access.
+
+NOTE: A second thread can access a resource after the first one has died, or once `resetUsedByThread()` (graps ownership) or `clearUsedByThread()` (allow the next user to be owner) has been called.
+
+Methods which can be called even after the resources has been closed, do not check for thread safety.
+
+The thread safety check can be turned off with the following option.
+
+`-Dcheck.thread.safety=off` or `-Dcheck.thread.safety=false`
+
+or add to the `system.properties` file in your working directory
+
+.system.properties
+----
+check.thread.safety=false
+----
+
+==== Performance considerations
+
+A `volatile int` is used for `closed` rather than `AtomicBoolean` to reduce overhead.
+
+By default, all stack tracing is turned off.
+
+=== SimpleCloseable
+
+This is a simpler `abstract class` for resources which are `Closeable` however, where it is less important to have `close` called e.g. when `close` does little or nothing.
+
+=== Closeable flyweights
+
+Flyweights are reuseable so they don't use `AbstractCloseable` or `SimpleCloseable`.
+They have their own simple lifecycle e.g. `DocumentContext`
+
+== ReferenceCounted
+
+Reference counted resources can be given multiple `ReferenceOwner` and only released once all references have been released.
+For simplicity, a default `ReferenceOwner.INIT` is assigned on creation.
+
+=== LifeCycle
+
+A reference owner can reserve ownership if the resource isn't closed (see below), released, or is currently reserved (after releasing a resource, it can be reserved again if it hasn't been released)
+
+This avoids the need to track in code all the places a resource might be needed.
+
+NOTE: If the lifecycle is simple, consider using a `Closeable` where possible.
+Reference counting should only be used where needed.
+
+=== AbstactReferenceCounted
+
+Like `AbstractCloseable` there are checks for use after being released and some read only method can be accessed after being released.
+Some classes may check whether access is by a single thread as `AbstractCloseable` does.
+
+`ReferenceCounted` has these key operations
+
+`reserve(ReferenceOwner)` - reserve this resource if not released or already reserved by this owner
+
+`release(ReferenceOwner)` - release one existing owner for this resource.
+
+`releaseLast(ReferenceOwner)` - release the ownership but check this is the last owner as well.
+
+`releaseLast()` - assume the last owner is `INIT`
+
+`tryReserve(ReferenceOwner)` - try to reserve this resource.
+This will return `false` if the resource has been released.
+NOTE: The default reference checking doesn't track the owners so this cannot detect duplicate attempts to reserve by the same owner.
+Tracing will produce an `IllegalStateException` with the location where it was first reserved.
+
+`refCount()` - the number of `ReferenceOwners`, when this drops to `0` it can no longer be reserved or used (apart from read-only method calls)
+
+==== Discarded resource warning
+
+A reference counted resource can override `Object.finalize()` to call `warnAndReleaseIfNotReleased()` This will report if a resource wasn't released, where the resource was created and still reserved to help determine where it should have been released (when resource tracing is turned on), and releases the resource.
+
+==== Tracing warnings
+
+When tracing is enabled, `AbstactReferenceCounted` will throw an `IllegalStateException` showing when a resource is reserved multiple times, released multiple times, or released without being reserved.
+
+==== Temporary ReferenceOwners
+
+Sometimes an additional owner is needed to prevent a resource being released while it is being used. e.g. in method to dump the contents of a resource.
+
+[source,Java]
+----
+ReferenceOwner toDebugString = ReferenceOwner.temporary("toDebugString");
+bytes.reserve(toDebugString);
+try {
+   // use bytes
+} finally {
+    bytes.release(toDebugString);
+}
+----
+
+==== Performance considerations
+
+A `volatile int` is used for `refCount` rather than `AtomicInteger` to reduce overhead.
+
+By default, all owner tracing and all stack tracing is turned off.
+The owners are effectly ignored, and the numer of `reserve` and `release` calls counted only.
+When tracing is enabled, all owners are tracked with a `StackTrace` for where they are reserved and released.
+
+== ReferenceCounted and Closeable
+
+A resource can support both `ReferenceCounted` and `Closeable`.
+When there is a single implied owner this works like a `Closeable` e.g.
+
+[source,Java]
+----
+try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
+
+}
+----
+
+is similar to
+
+[source,Java]
+----
+MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10);
+try {
+
+} finally {
+    mb.releaseLast();
+}
+----
+
+However, the same resource can be reserved by multiple owners if you need.
+
+NOTE: Once `close()` has been called no new owners can be added.
+
+=== AbstractCloseableReferenceCounted
+
+`AbstractCloseableReferenceCounted extends AbstractReferenceCounted` but also supports the `Closeable` interface.
+The `Closeable` functionality prevents any new owner being added and some key methods cannot be called even there are multiple references onwers. e.g. `MappedFile.acquireByteStore`
+
+== EventHandler
+
+An `EventHandler` is  `Closeable` for adding to an `EventLoop`.
+The `performClose` is called in the thread of the event loop when it has recognised the `EventHandler` is no longer needed.
+This is needed to avoid any thread safety issues were as resource is close while being used.  `close()` can be called asynchronously, however is only performed in the current thread if the `EventLoop` has finished.
+
+=== EventHandlerManager
+
+The lifecycle of an `EventHandler` is managed by the `EventHandlerManager`.
+Unlike the `abstract` classes above which must be extended, the `EventLoop` wraps an `EventHandler` with this manager when it is added (unless the EventHandler already extends this class giving you more control over the life cycle)
+
+=== Closing an EventHandler
+
+An EventHandler can be stopped two ways
+
+- Call `close()` the `Closeable` returned by `EventLoop.addHandler`
+- Trigger the `EventHandler` to throw an `InvalidEventHandlerException` in `action()` when it is no longer valid.
+
+Either way, `EventHandlerManager.performClose` or `EventHandler.close` will be called once using the thread for the `EventLoop`
+
+== Messages and what they mean
+
+When tracing is enabled, you will get longer stack traces to give you more detail which can seem like a lot of information.
+If you can't see a stack trace with a cause, check you have tracing enabled to be able to see this.
+
+'''
+
+.Error when using a resource after it has been closed
+----
+java.lang.IllegalStateException: Closed <1>
+	at net.openhft.chronicle.core.io.AbstractCloseable.throwExceptionIfClosed(AbstractCloseable.java:169)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.throwExceptionIfClosed(AbstractCloseableTest.java:46) <2>
+	... 28 more
+Caused by: net.openhft.chronicle.core.StackTrace: class net.openhft.chronicle.core.io.AbstractCloseableTest$MyCloseable - Closed here on main <3>
+	at net.openhft.chronicle.core.io.AbstractCloseable.close(AbstractCloseable.java:137) <4>
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.throwExceptionIfClosed(AbstractCloseableTest.java:44)
+	... 28 more
+----
+<1> Exception to say the resource is closed.
+<2> The method which doesn't allow you to use it after being closed
+<3> The thread which closed the resource
+<4> Where the resource was closed.
+
+'''
+
+.Error when a resource which is not thread safe is access from multiple threads
+----
+java.lang.IllegalStateException: Component which is not thread safes used by Thread[Thread-0,5,main] and Thread[main,5,main] <1>
+	at net.openhft.chronicle.core.io.AbstractCloseable.threadSafetyCheck(AbstractCloseable.java:220)
+	at net.openhft.chronicle.core.io.AbstractCloseable.throwExceptionIfClosed(AbstractCloseable.java:170)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.threadSafetyCheck(AbstractCloseableTest.java:107)
+Caused by: net.openhft.chronicle.core.StackTrace: Used here on Thread-0 <2>
+	at net.openhft.chronicle.core.io.AbstractCloseable.resetUsedByThread(AbstractCloseable.java:228)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.lambda$threadSafetyCheck$2(AbstractCloseableTest.java:97)
+	at java.lang.Thread.run(Thread.java:748)
+----
+<1> Where the resource was used again
+<2> Where it was first used.
+
+'''
+
+.Warning that a resource was discarded without closing
+----
+[main] WARN net.openhft.chronicle.core.io.AbstractCloseableTest$MyCloseable - Discarded without closing
+java.lang.IllegalStateException: net.openhft.chronicle.core.StackTrace: class net.openhft.chronicle.core.io.AbstractCloseableTest$MyCloseable - Created Here on main <1>
+	at net.openhft.chronicle.core.io.AbstractCloseable.warnAndCloseIfNotClosed(AbstractCloseable.java:187)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.warnAndCloseIfNotClosed(AbstractCloseableTest.java:57)
+	... 27 more
+Caused by: net.openhft.chronicle.core.StackTrace: class net.openhft.chronicle.core.io.AbstractCloseableTest$MyCloseable - Created Here on main <2>
+	at net.openhft.chronicle.core.io.AbstractCloseable.<init>(AbstractCloseable.java:53)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest$MyCloseable.<init>(AbstractCloseableTest.java:68)
+	at net.openhft.chronicle.core.io.AbstractCloseableTest.warnAndCloseIfNotClosed(AbstractCloseableTest.java:54) <3>
+	... 27 more
+----
+<1> The error reporting that the resource wasn't closed
+<2> The `StackTrace` of where the resource was created to help determine where it should have been closed.
+<3> Line where the resource was created
+
+'''
+
+.Took more than 20 ns to close a resource
+----
+[main] WARN net.openhft.chronicle.core.io.AbstractCloseableTest$MySlowCloseable - Took 50 ms to performClose on MySlowCloseable
+----
+
+This shows that a resource close synchronously took a long time.
+This can indicate the system is overloaded, or has high IO if this is not expected to occur. esp. if you see multiple resources with this warning in a short period.
+
+

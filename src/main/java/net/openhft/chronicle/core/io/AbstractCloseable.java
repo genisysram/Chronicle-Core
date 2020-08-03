@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.util.WeakIdentityHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Set;
@@ -147,8 +148,13 @@ public abstract class AbstractCloseable implements CloseableTracer, ReferenceOwn
             long time = System.nanoTime() - start;
             if (time >= 20_000_000 &&
                     !Thread.currentThread().getName().equals(BACKGROUND_RESOURCE_RELEASER))
-                Jvm.warn().on(getClass(), "Took " + time / 1000_000 + " ms to performClose");
+                warn().on(getClass(), "Took " + time / 1000_000 + " ms to performClose on " + getClass().getSimpleName());
         }
+    }
+
+    @NotNull
+    protected ExceptionHandler warn() {
+        return Slf4jExceptionHandler.WARN;
     }
 
     /**
@@ -183,8 +189,7 @@ public abstract class AbstractCloseable implements CloseableTracer, ReferenceOwn
     protected void warnAndCloseIfNotClosed() {
         if (!isClosed()) {
             if (Jvm.isResourceTracing()) {
-                ExceptionHandler warn = Jvm.getBoolean("warnAndCloseIfNotClosed") ? Jvm.warn() : Slf4jExceptionHandler.WARN;
-                warn.on(getClass(), "Discarded without closing", new IllegalStateException(createdHere));
+                warn().on(getClass(), "Discarded without closing", new IllegalStateException(createdHere));
             }
             close();
         }
