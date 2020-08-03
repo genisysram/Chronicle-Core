@@ -37,7 +37,7 @@ public interface EventLoop extends Closeable {
      * Handlers with same priority have no guarantee of execution order.
      *
      * @param handler handler
-     * @returns closeable to use for cleaning up.
+     * @return closeable to use for cleaning up.
      */
     Closeable addHandler(EventHandler handler);
 
