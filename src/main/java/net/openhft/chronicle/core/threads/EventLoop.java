@@ -35,11 +35,15 @@ public interface EventLoop extends Closeable {
     }
 
     /**
-     * Add handler to event loop to be executed. Event loops should execute handlers in order of priority.
+     * Adds the provided {@code handler} to this event loop to be executed.
+     * Event loops should execute handlers in order of priority.
      * Handlers with same priority have no guarantee of execution order.
      *
      * @param handler handler
      * @return closeable to use for cleaning up.
+     * @throws IllegalStateException if the handler could not be added
+     * due to the fact that the EventLoop was closed or that the
+     * event thread was interrupted.
      */
     Closeable addHandler(EventHandler handler);
 
@@ -59,13 +63,40 @@ public interface EventLoop extends Closeable {
      * @return closeable to use for cleaning up.
      * @throws IllegalStateException if the provided {@code priority} does not match the
      * constructed EventHandler's priority.
+     * @throws IllegalStateException if the handler could not be added
+     * due to the fact that the EventLoop was closed or that the
+     * event thread was interrupted.
      */
     Closeable addHandler(@NotNull BiFunction<Thread, EventLoop, EventHandler> constructor, @NotNull HandlerPriority priority);
 
+    /**
+     * Starts the EventLoop and the underlying event thread.
+     * <p>
+     * This method is idempotent and thus, subsequent invocations to this
+     * method following a first invocation is a no-op.
+     *
+     * @throws IllegalStateException if the EventLoop has been
+     * closed.
+     */
     void start();
 
+
+    /**
+     * Suggests that the event thread's pauser should be
+     * unpaused.
+     * <p>
+     * This method can be called when it is likely that
+     * there is useful work to be done by the event thread.
+     */
     void unpause();
 
+    /**
+     * Signals that the EventLoops underlying event thread should
+     * terminate.
+     * <p>
+     * This method is idempotent and thus, subsequent invocations to this
+     * method following a first invocation is a no-op.
+     */
     void stop();
 
     /**
