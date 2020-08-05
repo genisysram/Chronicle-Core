@@ -1,7 +1,10 @@
 package net.openhft.chronicle.core.threads;
 
 import net.openhft.chronicle.core.io.Closeable;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+
+import java.util.function.BiFunction;
 
 import static org.junit.Assert.*;
 
@@ -16,6 +19,11 @@ public class OnDemandEventLoopTest {
 
             @Override
             public Closeable addHandler(EventHandler handler) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Closeable addHandler(@NotNull BiFunction<Thread, EventLoop, EventHandler> constructor, @NotNull HandlerPriority priority) {
                 throw new UnsupportedOperationException();
             }
 

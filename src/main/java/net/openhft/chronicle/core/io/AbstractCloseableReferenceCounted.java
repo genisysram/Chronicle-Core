@@ -58,7 +58,8 @@ public abstract class AbstractCloseableReferenceCounted
     public void close() {
         if (!initReleased)
             release(INIT);
-        setClosed();
+        if (!closed)
+            setClosed();
     }
 
     protected void setClosed() {

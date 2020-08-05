@@ -2,8 +2,10 @@ package net.openhft.chronicle.core.io;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.StackTrace;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.util.WeakIdentityHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Set;
@@ -26,7 +28,7 @@ public abstract class AbstractReferenceCounted implements ReferenceCountedTracer
                 ? this::backgroundPerformRelease
                 : this::inThreadPerformRelease;
         referenceId = IOTools.counter(getClass()).incrementAndGet();
-        referenceCounted = ReferenceCountedTracer.onReleased(performRelease, referenceName());
+        referenceCounted = ReferenceCountedTracer.onReleased(performRelease, referenceName(), warn());
 
         Set<AbstractReferenceCounted> set = REFERENCE_COUNTED_SET;
         if (monitored && set != null)
@@ -99,7 +101,12 @@ public abstract class AbstractReferenceCounted implements ReferenceCountedTracer
         performRelease();
         long time = System.nanoTime() - start;
         if (time >= 2_000_000)
-            Slf4jExceptionHandler.WARN.on(getClass(), "Took " + time / 100_000 / 10.0 + " ms to performRelease");
+            warn().on(getClass(), "Took " + time / 100_000 / 10.0 + " ms to performRelease on " + getClass().getSimpleName());
+    }
+
+    @NotNull
+    protected ExceptionHandler warn() {
+        return Slf4jExceptionHandler.WARN;
     }
 
     protected boolean performReleaseInBackground() {
